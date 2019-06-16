@@ -1,101 +1,87 @@
 /*
-   Exemplo de um cliente TCP/IP usando sockets.
-   NOTE: Eu já postei um servidor para esse cliente.
-   para compilar:
-   $ gcc -o client tcp_client.c
-   para executar:
-   $ ./client <ip_do_servidor> <num_da_porta>
-   valeu!
+    C ECHO client example using sockets
 */
+#include<stdio.h> //printf
+#include<stdlib.h>
+#include <unistd.h>
+#include<string.h>    //strlen
+#include<sys/socket.h>    //socket
+#include<arpa/inet.h> //inet_addr
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-//
-#include <sys/types.h>
-#include <sys/socket.h>
-//struct sockaddr_in, htons() e outras
-#include <netinet/in.h>
-//funções inet_*()
-#include <arpa/inet.h>
-
-#include <errno.h> /*perror()*/
-#include <unistd.h> /*close()*/
-
-int main(int argc, char *argv[])
+int main(int argc , char *argv[])
 {
-   int sockfd;
-   int bytes;
-   socklen_t length;
-   char recv_buffer[32], send_buffer[32], quit;
-   struct sockaddr_in server;
+    int sock;
+    struct sockaddr_in server;
+    char message[10000] , server_reply[11286], server_reply_header[13000],error[5];
+
+    //Create socket
+    sock = socket(AF_INET , SOCK_STREAM,0);
+    if (sock == -1)
+    {
+        printf("Could not create socket");
+    }
+    puts("Socket created");
+
+    server.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server.sin_family = AF_INET;
+    server.sin_port = htons(8888);
+
+    //Connect to remote server
+    if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0)
+    {
+        perror("connect failed. Error");
+        return 1;
+    }
+
+    puts("Connected\n");
+
+    //keep communicating with server
    
-   sockfd = socket(AF_INET, SOCK_STREAM, 0);
-   if(sockfd < 0)
-   {
-      perror("client_sockfd:::");
-      exit(1);
-   }
-   
-   if(argc == 3)
-   {
-      server.sin_family  =  AF_INET;
-      //NOTE:aqui é meio sem garantia, mas espero que voce não erre ao passar o numero da porta.
-      server.sin_port    =  htons(atoi(argv[2]));
-      server.sin_addr.s_addr  =  inet_addr(argv[1]);
-      memset(&(server.sin_zero), 0x00, 8);
-   }
-   else
-   {
-      printf("\n\tusage: %s <ip_do_host> <num_porta> \n\n", argv[0]);
-      close(sockfd);
-      exit(1);
-   }
-   
-   //conectando-se ao servidor
-   length = sizeof(struct sockaddr);
-   if(connect(sockfd, (struct sockaddr *)&server, length) < 0)
-   {
-      perror("client_connect:::");
-      close(sockfd);
-      exit(1);
-   }
-   
-   quit = 'N';
-   while(quit != 'S')
-   {
-      bytes = recv(sockfd, recv_buffer, 32, 0);
-      //supondo que não ocorreu um erro acima
-      recv_buffer[bytes] = 0x00;//ponha o caractere '{FONTE}'
-      
-      //servidor fechou a conexão ou ocorreu um erro
-      if(bytes <= 0)//ocorreu um erro = -1, fechou conexão = 0
-      {
-         perror("client_recv:::");
-         close(sockfd);
-         exit(1);
-      }
-      
-      printf("\nDIGITE UMA MENSAGEM PARA ENVIAR AO SERVIDOR:\n");
-      //lendo da entrada padrão
-      fgets(send_buffer, 32, stdin);
-      //se no inicio da string estiver o 'S' então esse é o ultimo loop
-      quit = send_buffer[0];
-      
-      //enviando string ao servidor. strlen(send_buffer) pode ser menor que 32
-      bytes = send(sockfd, send_buffer, strlen(send_buffer), 0);
-      if(bytes < 0)
-      {
-         perror("client_send:::");
-         close(sockfd);
-         exit(1);
-      }
-      //só agora podemos ver a mensagem recebida do servidor
-      printf("\nRECEBIDO:::%s\n\n", recv_buffer);
-   }
-   
-   close(sockfd);
-   
-   return 0;
+    memset(&server_reply, 0, sizeof(server_reply) );
+        printf("Digite a identificação do recurso : ");
+        scanf("%s" , message);
+
+        //Send some data
+        if( send(sock , message , strlen(message) , 0) < 0)
+        {
+            puts("Send failed");
+        }
+
+        //Receive a reply from the server
+        if( recv(sock , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+        }
+
+        
+        //recebendo a data do header - receive header reply from server
+        if( recv(sock , server_reply_header , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+        }else{
+
+        if (strcmp(server_reply_header,"404: File not found")){
+         FILE *received_file;
+        received_file = fopen(message,"w+");
+
+        fwrite(server_reply,1,sizeof(server_reply), received_file);
+        fclose(received_file);
+        puts("\nArquivo recebido com sucesso!\n\n");
+        puts("HEADER:\n");
+        puts(server_reply_header);
+        puts(server_reply);
+        close(sock);
+        }else{
+         puts("\nArquivo nao existe no servidor\n");
+         puts("HEADER:\n");
+         puts(server_reply_header);
+         puts(server_reply);
+         close(sock);
+         puts("\n");
+        }
 }
 
+
+
+    return 0;
+}
