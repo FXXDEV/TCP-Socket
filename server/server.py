@@ -5,12 +5,12 @@ import sys
 from threading import Thread
 import asyncio
 
-def start_loop(loop):
+'''def start_loop(loop):
     asyncio.set_event_loop(loop)
     loop.run_forever()
 new_loop = asyncio.new_event_loop()
-t = Thread(target=start_loop, args=(new_loop,))
-t.start()
+t = Thread(target=start_loop, args=(new_loop,)) '''
+
  
 HOST,PORT = '127.0.0.1',8888
  
@@ -22,11 +22,13 @@ my_socket.listen(1)
 print('Serving on port ',PORT)
  
 while True:
-   
-   
-    connection,address = my_socket.accept()
-    request = connection.recv(1024).decode('utf-8')
-    string_list = request.split(' ')     # Split request from spaces
+    
+    connection,address = my_socket.accept() #aguardando a conexao
+
+    request = connection.recv(1024).decode('utf-8') #aguardando a mensagem
+
+    
+    print('Client request ',request) 
  
     myfile = request
     
@@ -34,9 +36,9 @@ while True:
         myfile = 'index.html'    # Load index file as default
  
     try:
-    
+        
         file = open(myfile,'rb') # open file , r => read , b => byte format
-        response = file.read(1024)
+        response = file.read()
         file.seek(0,2)
         lenght = file.tell()
         file.close()
@@ -64,4 +66,7 @@ while True:
     final_header = header.encode('utf-8')
     connection.send(final_header)
     connection.send(final_response)
+    connection.close()
+    #t.start()
+    sys.exit()
    
