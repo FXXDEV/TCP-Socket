@@ -1,15 +1,11 @@
 import socket
-import time
 import os
+from datetime import datetime
 import sys
 from threading import Thread
 import asyncio
 
-'''def start_loop(loop):
-    asyncio.set_event_loop(loop)
-    loop.run_forever()
-new_loop = asyncio.new_event_loop()
-t = Thread(target=start_loop, args=(new_loop,)) '''
+
 
  
 HOST,PORT = '127.0.0.1',8888
@@ -20,18 +16,14 @@ my_socket.bind((HOST,PORT))
 my_socket.listen(1)
  
 print('Serving on port ',PORT)
- 
-while True:
-    
-    connection,address = my_socket.accept() #aguardando a conexao
+def fn(connection):
 
     request = connection.recv(1024).decode('utf-8') #aguardando a mensagem
-
-    
     print('Client request ',request) 
- 
+     
     myfile = request
     
+
     if(myfile == ''):
         myfile = 'index.html'    # Load index file as default
  
@@ -53,20 +45,36 @@ while True:
         else:
             mimetype = 'text/html'
         
-        time = time.strftime("%Y-%m-%d %H:%M:%S")
-        #lenght = response
-        header += '\nContent-Type: '+str(mimetype)+'\nDate: '+str(time)+'\nServer: Apache/2(Ubuntu)\nLenght:'+str(lenght)+'\n'+'Header-Number-Fields: 5\n'
+        time = datetime.now()
             
+        
+        header += '\nContent-Type: '+str(mimetype)+'\nDate: '+str(time)+'\nServer: Apache/2(Ubuntu)\nLenght:'+str(lenght)+'\n'+'Header-Number-Fields: 5\n'
+        #print(header)
  
     except Exception as e:
         header = 'HTTP/1.1 404 Not Found\n\n'
         response = '<html><body><center><h3>Error 404: File not found</h3><p>Python HTTP Server</p></center></body></html>'.encode('utf-8')
- 
+    
+
     final_response = response
     final_header = header.encode('utf-8')
-    connection.send(final_header)
     connection.send(final_response)
+    connection.send(final_header)
     connection.close()
     #t.start()
-    sys.exit()
-   
+    #sys.exit()
+
+    
+
+        
+while True:
+    connection,address = my_socket.accept() #aguardando a conexao
+    
+#    def start_loop(loop):
+#        asyncio.set_event_loop(loop)
+#        loop.run_forever()
+#        new_loop = asyncio.new_event_loop()
+    t = Thread(target=fn(connection))
+    t.start()
+
+
