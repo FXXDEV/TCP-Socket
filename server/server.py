@@ -4,7 +4,7 @@ from datetime import datetime
 import sys
 from threading import Thread
 import asyncio
-
+import base64
 
 
  
@@ -56,10 +56,11 @@ def fn(connection):
         response = '<html><body><center><h3>Error 404: File not found</h3><p>Python HTTP Server</p></center></body></html>'.encode('utf-8')
     
 
-    final_response = response
+    final_response = base64.b64encode(response)
     final_header = header.encode('utf-8')
-    connection.send(final_response)
+    
     connection.send(final_header)
+    connection.send(final_response)
     connection.close()
     #t.start()
     #sys.exit()
@@ -70,10 +71,6 @@ def fn(connection):
 while True:
     connection,address = my_socket.accept() #aguardando a conexao
     
-#    def start_loop(loop):
-#        asyncio.set_event_loop(loop)
-#        loop.run_forever()
-#        new_loop = asyncio.new_event_loop()
     t = Thread(target=fn(connection))
     t.start()
 
