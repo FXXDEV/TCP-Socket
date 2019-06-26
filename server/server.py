@@ -60,11 +60,13 @@ def fn(connection):
         final_response = base64.b64encode(response)
         final_header = header.encode('utf-8')
         connection.send(final_header)    
-        connection.send(final_response)
+        #connection.send(final_response)
+        connection.send(response)#for python sock
     elif((myfile.endswith(".html"))|(myfile.endswith(".txt"))):
         final_response = base64.b64encode(response)
         final_header = header.encode('utf-8')
-        connection.send(final_response) 
+        #connection.send(final_response) 
+        connection.send(response)#for python sock
         connection.send(final_header)    
                
 

@@ -7,8 +7,8 @@
 #include<string.h>    //strlen
 #include<sys/socket.h>    //socket
 #include<arpa/inet.h> //inet_addr
-
-int main(int argc , char *argv[])
+#include "base64.c"
+int main()
 {
     int sock;
     struct sockaddr_in server;
@@ -38,7 +38,7 @@ int main(int argc , char *argv[])
     //keep communicating with server
    
     memset(&server_reply, 0, sizeof(server_reply) );
-        printf("Digite a identificação do recurso : ");
+        printf("Digite a identificaÃ§Ã£o do recurso : ");
         scanf("%s" , message);
 
         //Send some data
@@ -64,7 +64,7 @@ int main(int argc , char *argv[])
          FILE *received_file;
         received_file = fopen(message,"w+");
 
-        fwrite(server_reply,1,sizeof(server_reply), received_file);
+        fwrite(base64_decode(server_reply),1,sizeof(server_reply), received_file);
         fclose(received_file);
         puts("\nArquivo recebido com sucesso!\n\n");
         puts("HEADER:\n");
