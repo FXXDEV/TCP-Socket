@@ -56,11 +56,18 @@ def fn(connection):
         response = '<html><body><center><h3>Error 404: File not found</h3><p>Python HTTP Server</p></center></body></html>'.encode('utf-8')
     
 
-    final_response = base64.b64encode(response)
-    final_header = header.encode('utf-8')
-    
-    connection.send(final_header)
-    connection.send(final_response)
+    if((myfile.endswith(".jpg"))|(myfile.endswith(".gif"))):
+        final_response = base64.b64encode(response)
+        final_header = header.encode('utf-8')
+        connection.send(final_header)    
+        connection.send(final_response)
+    elif((myfile.endswith(".html"))|(myfile.endswith(".txt"))):
+        final_response = base64.b64encode(response)
+        final_header = header.encode('utf-8')
+        connection.send(final_response) 
+        connection.send(final_header)    
+               
+
     connection.close()
     #t.start()
     #sys.exit()
