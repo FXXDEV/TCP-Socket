@@ -6,8 +6,6 @@ from threading import Thread
 import asyncio
 import base64
 
-
- 
 HOST,PORT = '127.0.0.1',8888
  
 my_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -23,7 +21,6 @@ def fn(connection):
      
     myfile = request
     
-
     if(myfile == ''):
         myfile = 'index.html'    # Load index file as default
  
@@ -59,15 +56,19 @@ def fn(connection):
     if((myfile.endswith(".jpg"))|(myfile.endswith(".gif"))):
         final_response = base64.b64encode(response)
         final_header = header.encode('utf-8')
-        connection.send(final_header)    
-        #connection.send(final_response)
-        connection.send(response)#for python sock
+        connection.send(final_header)
+        connection.send(final_response)
+        #connection.send(final_response)#for python sock
     elif((myfile.endswith(".html"))|(myfile.endswith(".txt"))):
         final_response = base64.b64encode(response)
         final_header = header.encode('utf-8')
-        #connection.send(final_response) 
-        connection.send(response)#for python sock
-        connection.send(final_header)    
+        connection.send(final_response) 
+        #connection.send(final_response)#for python sock
+        connection.send(final_header)
+    '''final_header = header.encode('utf-8')
+    final_response = base64.b64encode(response)
+    connection.send(final_header) 
+    connection.send(final_response)'''
                
 
     connection.close()
